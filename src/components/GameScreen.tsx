@@ -330,8 +330,8 @@ export default function GameScreen({ category, targetScore, onBackToMenu, onVict
       }`}
       style={{
         backgroundImage: `url(${gameBackground})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundSize: '100% 100%',
+        backgroundPosition: 'bottom center',
       }}
     >
       {/* Force Horizontal Mode Overlay */}
@@ -344,23 +344,24 @@ export default function GameScreen({ category, targetScore, onBackToMenu, onVict
       </div>
 
       {/* HUD Top Bar panel */}
-      <div id="game-hud" className="relative z-40 w-full bg-black/45 backdrop-blur-md p-4 flex items-center justify-between border-b border-white/10 shadow-lg">
+      <div id="game-hud" className="relative z-40 w-full bg-black/45 backdrop-blur-md p-2 sm:p-3 md:p-4 flex items-center justify-between border-b border-white/10 shadow-lg">
         <button
           id="btn-quit"
           onClick={onBackToMenu}
-          className="flex items-center gap-1.5 px-3.5 py-2 text-white bg-white/15 hover:bg-white/25 border border-white/20 hover:border-white/30 rounded-xl font-bold text-sm leading-none cursor-pointer transition-all"
+          className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-white bg-white/15 hover:bg-white/25 border border-white/20 hover:border-white/30 rounded-xl font-bold text-xs sm:text-sm leading-none cursor-pointer transition-all shrink-0"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           <span>Salir</span>
         </button>
 
         {/* Level Progression Indicator Bar */}
-        <div className="flex-1 max-w-xs md:max-w-md mx-4 flex flex-col gap-1.5">
-          <div className="flex justify-between items-center text-xs text-white/90 font-extrabold px-1">
-            <span>PROGRESO A LA META</span>
-            <span className="text-emerald-300 font-extrabold">{score} / {targetScore} aciertos</span>
+        <div className="flex-1 max-w-[150px] sm:max-w-xs md:max-w-md mx-2 sm:mx-4 flex flex-col gap-0.5 sm:gap-1.5">
+          <div className="flex justify-between items-center text-[10px] sm:text-xs text-white/90 font-extrabold px-1 leading-none">
+            <span className="hidden sm:inline">PROGRESO A LA META</span>
+            <span className="inline sm:hidden uppercase">PROGRESO:</span>
+            <span className="text-emerald-300 font-extrabold">{score} / {targetScore}</span>
           </div>
-          <div className="w-full h-3.5 bg-black/40 rounded-full border border-white/10 overflow-hidden p-0.5 shadow-inner">
+          <div className="w-full h-1.5 sm:h-2.5 md:h-3.5 bg-black/40 rounded-full border border-white/10 overflow-hidden p-0.5 shadow-inner">
             <motion.div
               style={{ width: `${Math.min(100, (score / targetScore) * 100)}%` }}
               className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
@@ -370,13 +371,13 @@ export default function GameScreen({ category, targetScore, onBackToMenu, onVict
         </div>
 
         {/* Lives (Eggs representing 3 turns) and Audio Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Speckled Dino Eggs lives indicator */}
-          <div id="lives-indicator" className="flex gap-1.5 bg-black/25 border border-white/15 py-1.5 px-3 rounded-full mr-1 items-center">
+          <div id="lives-indicator" className="flex gap-1 bg-black/25 border border-white/15 py-1 px-1.5 sm:py-1.5 sm:px-3 rounded-full mr-0.5 sm:mr-1 items-center">
             {[0, 1, 2].map((idx) => {
               const intact = idx < lives;
               return (
-                <div key={idx} className="relative w-7 h-8">
+                <div key={idx} className="relative w-4.5 h-5.5 sm:w-7 sm:h-8">
                   {intact ? (
                     // Beautiful Speckled Intact Green Dino Egg
                     <svg viewBox="0 0 100 120" className="w-full h-full filter drop-shadow-sm">
@@ -410,28 +411,28 @@ export default function GameScreen({ category, targetScore, onBackToMenu, onVict
           <button
             id="btn-audio-toggle"
             onClick={() => setMuted(!muted)}
-            className="p-2 bg-white/10 border border-white/20 hover:bg-white/20 rounded-xl text-white cursor-pointer transition"
+            className="p-1.5 sm:p-2 bg-white/10 border border-white/20 hover:bg-white/20 rounded-lg sm:rounded-xl text-white cursor-pointer transition shrink-0"
             title={muted ? 'Activar sonido' : 'Silenciar'}
           >
-            {muted ? <VolumeX className="w-5 h-5 text-red-400" /> : <Volume2 className="w-5 h-5 text-green-400" />}
+            {muted ? <VolumeX className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" /> : <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />}
           </button>
         </div>
       </div>
 
-      {/* Floating Centered Math Slate Tablet (Clean UX floating over the background sky) */}
-      <div className="absolute top-22 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-amber-950/90 border-2 border-amber-800 px-5 py-2.5 rounded-2xl shadow-2xl shadow-black/80 backdrop-blur-md">
-        <span className="text-[10px] uppercase font-black text-amber-400 tracking-widest hidden sm:inline mr-1">🦖 RESUELVE:</span>
-        <div id="chalkboard-formula" className="text-3xl sm:text-4xl font-black text-stone-50 tracking-wide select-none">
-          {question.num1} <span className="text-amber-400">{question.operator}</span> {question.num2} <span className="text-yellow-300">=</span> <span className="text-emerald-400 font-extrabold animate-pulse">?</span>
+      {/* Floating Centered Math Slate Tablet & Question Component (Optimized to always fit in exactly 1 line) */}
+      <div className="absolute top-12 sm:top-18 md:top-20 lg:top-22 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1.5 sm:gap-3 bg-amber-950/90 border-2 border-amber-800 px-3 sm:px-5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-2xl shadow-black/80 backdrop-blur-md max-w-[90vw] whitespace-nowrap overflow-hidden justify-center select-none">
+        <span className="text-[9px] sm:text-[10px] uppercase font-black text-amber-400 tracking-widest hidden md:inline mr-1">🦖 RESUELVE:</span>
+        <div id="chalkboard-formula" className="text-xs sm:text-xl md:text-2xl lg:text-3xl font-black text-stone-50 tracking-wide select-none whitespace-nowrap flex items-center leading-none">
+          {question.num1} <span className="text-amber-400 mx-1">{question.operator}</span> {question.num2} <span className="text-yellow-300 mx-1">=</span> <span className="text-emerald-400 font-extrabold animate-pulse ml-1">?</span>
         </div>
         <button
           id="btn-skip"
           onClick={handleSkipQuestion}
           disabled={isLocked}
-          className="ml-3 p-2 bg-amber-800 hover:bg-amber-700 active:bg-amber-900 border border-amber-700 text-amber-100 disabled:opacity-50 rounded-xl cursor-pointer transition-colors flex items-center justify-center shadow-md shadow-amber-950"
+          className="ml-2 sm:ml-3 p-1 sm:p-1.5 bg-amber-800 hover:bg-amber-700 active:bg-amber-900 border border-amber-700 text-amber-100 disabled:opacity-50 rounded-lg sm:rounded-xl cursor-pointer transition-colors flex items-center justify-center shadow-md shadow-amber-950 shrink-0"
           title="Cambiar pregunta"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
         </button>
       </div>
 
@@ -482,10 +483,10 @@ export default function GameScreen({ category, targetScore, onBackToMenu, onVict
         </AnimatePresence>
       </div>
 
-      {/* Dinosaur Character (Center aligned at the bottom) */}
+      {/* Dinosaur Character (Center aligned at the bottom y-axis, scaling down and anchoring perfectly to background ground) */}
       <div 
         ref={dinoRef} 
-        className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 z-30 select-none pointer-events-none flex justify-center w-[300px] sm:w-[360px] md:w-[420px] lg:w-[460px] h-[300px] sm:h-[360px] md:h-[420px] lg:h-[460px]"
+        className="absolute bottom-[-15px] sm:bottom-[-20px] left-1/2 -translate-x-1/2 z-30 select-none pointer-events-none flex justify-center w-[220px] sm:w-[320px] md:w-[400px] h-[220px] sm:h-[320px] md:h-[400px]"
       >
         <Dinosaur state={dinoState} />
       </div>

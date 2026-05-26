@@ -10,9 +10,10 @@ import dinoEating from '@/assets/Dinosaur/dino_eating.webm';
 
 interface DinosaurProps {
   state: DinoState;
+  showOverlays?: boolean;
 }
 
-export default function Dinosaur({ state }: DinosaurProps) {
+export default function Dinosaur({ state, showOverlays = true }: DinosaurProps) {
   const [blink, setBlink] = useState(false);
 
   // Asset validation state. If a file is empty or missing, browser triggers error,
@@ -151,43 +152,45 @@ export default function Dinosaur({ state }: DinosaurProps) {
   return (
     <div id="dinosaur-canvas-container" className="relative flex flex-col items-center justify-center w-[300px] h-[300px] sm:w-[360px] sm:h-[360px] md:w-[420px] md:h-[420px] lg:w-[460px] lg:h-[460px] select-none">
       {/* Dynamic Overlay Text & Badges (Munching, Happy, Sad) */}
-      <div className="absolute top-0 flex flex-col items-center pointer-events-none z-20">
-        <AnimatePresence>
-          {state === 'happy' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.5 }}
-              animate={{ opacity: 1, y: -20, scale: 1.2 }}
-              exit={{ opacity: 0 }}
-              className="text-yellow-400 text-3xl font-bold flex gap-1 filter drop-shadow-md"
-            >
-              <span>⭐</span>
-              <span>¡RRIQUÍSIMO!</span>
-              <span>💚</span>
-            </motion.div>
-          )}
-          {state === 'sad' && (
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.5 }}
-              animate={{ opacity: 1, y: -10, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="bg-red-500 text-white font-extrabold text-xs px-3 py-1 rounded-full shadow-lg border border-red-300 flex items-center gap-1"
-            >
-              <span>😢</span>
-              <span>¡Uy! ¡Casi!</span>
-            </motion.div>
-          )}
-          {state === 'eating' && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: [1, 1.1, 1] }}
-              exit={{ opacity: 0 }}
-              className="text-amber-600 dark:text-amber-400 font-extrabold tracking-widest text-lg"
-            >
-              ¡ÑAM ÑAM!
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      {showOverlays && (
+        <div className="absolute top-0 flex flex-col items-center pointer-events-none z-20">
+          <AnimatePresence>
+            {state === 'happy' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.5 }}
+                animate={{ opacity: 1, y: -20, scale: 1.2 }}
+                exit={{ opacity: 0 }}
+                className="text-yellow-400 text-3xl font-bold flex gap-1 filter drop-shadow-md"
+              >
+                <span>⭐</span>
+                <span>¡RRIQUÍSIMO!</span>
+                <span>💚</span>
+              </motion.div>
+            )}
+            {state === 'sad' && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.5 }}
+                animate={{ opacity: 1, y: -10, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="bg-red-500 text-white font-extrabold text-xs px-3 py-1 rounded-full shadow-lg border border-red-300 flex items-center gap-1"
+              >
+                <span>😢</span>
+                <span>¡Uy! ¡Casi!</span>
+              </motion.div>
+            )}
+            {state === 'eating' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: [1, 1.1, 1] }}
+                exit={{ opacity: 0 }}
+                className="text-amber-600 dark:text-amber-400 font-extrabold tracking-widest text-lg"
+              >
+                ¡ÑAM ÑAM!
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       {/* RENDER BODY (Custom graphic files OR Animated SVG Fallback) */}
       {!hasError ? (

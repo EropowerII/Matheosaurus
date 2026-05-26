@@ -39,31 +39,27 @@ export default function GameOverScreen({
   ];
 
   return (
-    <div className="flex flex-col items-center justify-between w-full max-w-lg mx-auto p-4 md:p-5 bg-gradient-to-b from-slate-900/95 via-slate-800/95 to-slate-950/98 text-white rounded-3xl shadow-2xl border-2 border-rose-500/60 relative overflow-hidden select-none max-h-[85vh] sm:max-h-none">
+    <div className="flex flex-col items-center justify-between w-full max-w-md mx-auto p-3 sm:p-5 bg-gradient-to-b from-slate-900/95 via-slate-800/95 to-slate-950/98 text-white rounded-2xl shadow-2xl border-2 border-rose-500/60 relative overflow-hidden select-none max-h-full sm:max-h-none leading-tight my-auto">
       {/* Background visual effects */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-4 left-6 text-red-400 animate-pulse text-lg">💡</div>
-        <div className="absolute top-8 right-6 text-rose-300 animate-pulse text-xl">✨</div>
-        <div className="absolute bottom-16 left-6 text-orange-400 animate-bounce text-sm">✨</div>
-        <div className="absolute bottom-4 right-8 text-amber-300 animate-pulse text-lg">⭐</div>
         <div className="absolute inset-0 bg-radial-gradient from-rose-500/5 to-transparent pointer-events-none" />
       </div>
 
       {/* Top Banner details */}
       <div className="relative z-10 w-full flex flex-col items-center mt-1">
-        <div className="flex items-center gap-1.5 bg-rose-500/20 px-3 py-1 rounded-full border border-rose-500/30 text-[10px] md:text-xs font-black tracking-widest text-rose-300 uppercase">
+        <div className="flex items-center gap-1 bg-rose-500/20 px-3 py-0.5 rounded-full border border-rose-500/30 text-[9px] md:text-xs font-black tracking-widest text-rose-300 uppercase">
           🚨 ¡DINO-DESAFÍO CERRADO!
         </div>
       </div>
 
       {/* Hero Character & Flying Banners Overlay Container */}
-      <div className="relative w-full h-44 sm:h-52 md:h-56 flex items-center justify-center shrink-0 my-1 overflow-visible z-10">
+      <div className="relative w-full h-28 sm:h-44 md:h-48 flex items-center justify-center shrink-0 my-0.5 overflow-visible z-10">
         {/* Animated Backlight Glow */}
-        <div className="absolute w-24 h-24 sm:w-32 sm:h-32 bg-rose-500/10 blur-2xl rounded-full animate-pulse" />
+        <div className="absolute w-16 h-16 sm:w-28 sm:h-28 bg-rose-500/10 blur-2xl rounded-full animate-pulse" />
 
         {/* Big dinosaur scaled naturally for safe layout */}
-        <div className="transform scale-[0.45] sm:scale-[0.52] md:scale-[0.58] origin-center z-10 flex items-center justify-center pointer-events-none">
-          <Dinosaur state="sad" />
+        <div className="transform scale-[0.25] sm:scale-[0.40] md:scale-[0.48] origin-center z-10 flex items-center justify-center pointer-events-none">
+          <Dinosaur state="sad" showOverlays={false} />
         </div>
 
         {/* Orbiting / Flying Golden Stars next to dinosaur representing the goal */}
@@ -74,19 +70,19 @@ export default function GameOverScreen({
             rotate: [0, 180, 360],
           }}
           transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-8 right-10 text-yellow-300 drop-shadow-[0_1px_5px_rgba(234,179,8,0.6)] z-10"
+          className="absolute top-4 right-10 text-yellow-300 drop-shadow-[0_1px_5px_rgba(234,179,8,0.6)] z-10"
         >
-          <Star className="w-8 h-8 fill-yellow-300/40 text-yellow-500" />
+          <Star className="w-6 h-6 fill-yellow-300/40 text-yellow-500" />
         </motion.div>
 
         {/* OVER THE DINOSAUR Floating Level Fail Banner */}
         <motion.div
           initial={{ scale: 0.6, opacity: 0, y: 15 }}
-          animate={{ scale: [0.8, 1.1, 1], opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, type: 'spring' }}
-          className="absolute bottom-1 sm:bottom-2 left-1/2 -translate-x-1/2 z-20 pointer-events-none max-w-[95%]"
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, type: 'spring', bounce: 0.45 }}
+          className="absolute bottom-0 sm:bottom-1 left-1/2 -translate-x-1/2 z-20 pointer-events-none max-w-[95%]"
         >
-          <div className="bg-gradient-to-r from-red-500 via-rose-600 to-red-500 text-white font-black text-2xl sm:text-3xl md:text-4xl tracking-widest uppercase py-2 px-6 sm:px-8 rounded-2xl shadow-2xl border-2 border-white/75 text-center drop-shadow-[0_5px_15px_rgba(239,68,68,0.6)] whitespace-nowrap">
+          <div className="bg-gradient-to-r from-red-500 via-rose-600 to-red-500 text-white font-black text-lg sm:text-2xl md:text-3xl tracking-widest uppercase py-1 px-4 sm:px-6 rounded-xl shadow-lg border-2 border-white/75 text-center drop-shadow-[0_4px_10px_rgba(239,68,68,0.5)] whitespace-nowrap">
             Misión Fallida
           </div>
         </motion.div>
