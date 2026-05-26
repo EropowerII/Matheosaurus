@@ -1,0 +1,6 @@
+{
+  "name": "Dinosaurio Come Números",
+  "description": "Juego educativo de matemáticas para niños de 8 a 12 años, donde un tierno dinosaurio come burbujas con respuestas correctas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
