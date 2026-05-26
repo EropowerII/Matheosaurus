@@ -42,7 +42,7 @@ export default function App() {
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-sky-200/40 rounded-full mix-blend-multiply filter blur-3xl pointer-events-none translate-x-16 translate-y-16" />
 
       {/* Header bar */}
-      <header className="relative z-10 w-full max-w-5xl mx-auto px-4 pt-6 pb-2 flex justify-between items-center select-none">
+      <header className="relative z-10 w-full max-w-5xl mx-auto px-4 pt-4 pb-1 flex justify-between items-center select-none">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
             🦖
@@ -51,10 +51,6 @@ export default function App() {
             <span className="font-sans font-black text-slate-800 tracking-tight text-lg">DinoMath</span>
             <span className="text-[10px] block font-bold text-slate-400 uppercase tracking-widest leading-none">Come Números</span>
           </div>
-        </div>
-        <div className="flex items-center gap-1 bg-green-100/80 px-3 py-1.5 rounded-full border border-green-200 text-green-800 font-bold text-xs shadow-xs">
-          <Sparkles className="w-3.5 h-3.5 text-green-600 fill-green-500/50" />
-          <span>Matemática Divertida</span>
         </div>
       </header>
 
@@ -91,11 +87,6 @@ export default function App() {
           />
         )}
       </main>
-
-      {/* Prehistoric thematic footer */}
-      <footer className="relative z-10 w-full py-4 text-center text-slate-400 text-xs">
-        <span>© 2026 DinoMath • ¡La forma más divertida de aprender matemáticas!</span>
-      </footer>
     </div>
   );
 }

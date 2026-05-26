@@ -6,6 +6,9 @@ import Dinosaur from './Dinosaur';
 import MathBubble from './MathBubble';
 import { ArrowLeft, Volume2, VolumeX, RefreshCw, Star, Heart } from 'lucide-react';
 
+// Custom prehistoric scenario background
+import gameBackground from '@/assets/Dinosaur/Background.png';
+
 interface GameScreenProps {
   category: OperationType;
   onVictory: (finalScore: number) => void;
@@ -110,26 +113,30 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
   const [muted, setMuted] = useState<boolean>(false);
   const [screenFlasher, setScreenFlasher] = useState<'red' | 'green' | null>(null);
 
-  // Flying number states for feeding the dinosaur
+  // Flying number states for feeding the dinosaur (targets are in pixel space relative to sandbox)
   const [flyingNumber, setFlyingNumber] = useState<{
     value: number;
     startX: number;
     startY: number;
+    targetX?: number;
+    targetY?: number;
   } | null>(null);
 
   // Reference container for bounds sizing
   const bubbleSandboxRef = useRef<HTMLDivElement>(null);
+  const dinoRef = useRef<HTMLDivElement>(null);
+  const alreadyReachedRef = useRef<boolean>(false);
 
   // Initialize bubbles for a new question
   useEffect(() => {
     const freshBubbles = question.options.map((option, idx) => {
-      // Distribute starting coordinates cleanly to avoid total immediate overlap
-      const startX = 15 + idx * 22 + (Math.random() * 6 - 3); // 15%, 37%, 59%, 81%
-      const startY = 10 + (idx % 2) * 20 + Math.random() * 10;
+      // Distribute starting coordinates cleanly around screen to avoid immediate overlap
+      const startX = 10 + idx * 22 + (Math.random() * 6 - 3); // 10%, 32%, 54%, 76%
+      const startY = 20 + (idx % 2) * 20 + Math.random() * 10;
       
       // Speed values in percent per tick
-      const speedX = (Math.random() * 0.2 + 0.1) * (Math.random() > 0.5 ? 1 : -1);
-      const speedY = (Math.random() * 0.15 + 0.08) * (Math.random() > 0.5 ? 1 : -1);
+      const speedX = (Math.random() * 0.18 + 0.1) * (Math.random() > 0.5 ? 1 : -1);
+      const speedY = (Math.random() * 0.14 + 0.08) * (Math.random() > 0.5 ? 1 : -1);
 
       return {
         id: `bubble-${idx}-${option}-${Math.random()}`,
@@ -138,7 +145,7 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
         y: startY,
         speedX,
         speedY,
-        size: 76 + Math.floor(Math.random() * 14), // 76px - 90px
+        size: 78 + Math.floor(Math.random() * 14), // 78px - 92px
         isCorrect: option === question.correctAnswer,
         popped: false,
         color: BUBBLE_COLORS[idx % BUBBLE_COLORS.length]
@@ -163,21 +170,21 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
           let nextSpeedX = b.speedX;
           let nextSpeedY = b.speedY;
 
-          // X bounce limits (keep within 2% to 88% width bounds)
-          if (nextX <= 2) {
-            nextX = 2;
+          // X bounce limits with maximum coverage (keep within 4% to 92% width bounds)
+          if (nextX <= 4) {
+            nextX = 4;
             nextSpeedX = Math.abs(b.speedX);
-          } else if (nextX >= 88) {
-            nextX = 88;
+          } else if (nextX >= 92) {
+            nextX = 92;
             nextSpeedX = -Math.abs(b.speedX);
           }
 
-          // Y bounce limits (keep bubbles in upper "clouds" air, between 2% and 66% height bounds)
-          if (nextY <= 2) {
-            nextY = 2;
+          // Y bounce limits (keep bubbles in generous screen area, between 15% and 82% height bounds)
+          if (nextY <= 15) {
+            nextY = 15;
             nextSpeedY = Math.abs(b.speedY);
-          } else if (nextY >= 66) {
-            nextY = 66;
+          } else if (nextY >= 82) {
+            nextY = 82;
             nextSpeedY = -Math.abs(b.speedY);
           }
 
@@ -212,11 +219,34 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
       setScreenFlasher('green');
       setTimeout(() => setScreenFlasher(null), 300);
 
+      // Measure precise source and target coordinates on screen in pixel coordinates relative to sandbox
+      let startPixelX = 0;
+      let startPixelY = 0;
+      if (bubbleSandboxRef.current) {
+        const rect = bubbleSandboxRef.current.getBoundingClientRect();
+        startPixelX = (clickedBubble.x / 100) * rect.width;
+        startPixelY = (clickedBubble.y / 100) * rect.height;
+      }
+
+      let targetPixelX = window.innerWidth * 0.15; // default fallback
+      let targetPixelY = window.innerHeight * 0.75; // default fallback
+      if (dinoRef.current && bubbleSandboxRef.current) {
+        const dinoRect = dinoRef.current.getBoundingClientRect();
+        const sandboxRect = bubbleSandboxRef.current.getBoundingClientRect();
+        // Since the dinosaur's mouth is located in the upper middle/right section of the Dino's container,
+        // we map to 55% of the dino container's width and 35% of its height as the target point.
+        targetPixelX = dinoRect.left - sandboxRect.left + (dinoRect.width * 0.55);
+        targetPixelY = dinoRect.top - sandboxRect.top + (dinoRect.height * 0.35);
+      }
+
       // Trigger food-flying sequence
+      alreadyReachedRef.current = false;
       setFlyingNumber({
         value: clickedBubble.value,
-        startX: clickedBubble.x,
-        startY: clickedBubble.y
+        startX: startPixelX,
+        startY: startPixelY,
+        targetX: targetPixelX,
+        targetY: targetPixelY
       });
     } else {
       // INCORRECT ANSWER MECHANISM:
@@ -253,13 +283,16 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
 
   // Flying number arrived at T-Rex's position
   const handleNumberReachedDino = () => {
+    if (alreadyReachedRef.current) return;
+    alreadyReachedRef.current = true;
+
     setFlyingNumber(null);
     setDinoState('eating');
     playSynthSound('chew', muted);
 
-    // Chewing sequence (0.8 seconds), then celebrate
+    // Chewing sequence of exactly 1.4 seconds (matches webm length), then back to idle
     setTimeout(() => {
-      setDinoState('happy');
+      setDinoState('idle'); // Skip happy stance - go straight to idle
       playSynthSound('success', muted);
       
       const newScore = score + 1;
@@ -278,12 +311,9 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
         }, 1200);
       } else {
         // Keep moving forward -> generate next math question
-        setTimeout(() => {
-          setDinoState('idle');
-          setQuestion(generateQuestion(category));
-        }, 1400);
+        setQuestion(generateQuestion(category));
       }
-    }, 900);
+    }, 1400);
   };
 
   // Skip / Regenerate current question (helpful if student gets stuck)
@@ -293,15 +323,31 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
   };
 
   return (
-    <div className={`relative flex flex-col justify-between w-full max-w-5xl mx-auto h-[620px] md:h-[680px] bg-sky-200/40 rounded-3xl overflow-hidden shadow-2xl border border-slate-100 transition-colors duration-300 ${
-      screenFlasher === 'red' ? 'bg-red-400/40' : screenFlasher === 'green' ? 'bg-emerald-400/40' : ''
-    }`}>
+    <div 
+      className={`fixed inset-0 w-screen h-screen z-50 flex flex-col justify-between overflow-hidden transition-colors duration-300 ${
+        screenFlasher === 'red' ? 'bg-red-500/20' : screenFlasher === 'green' ? 'bg-emerald-500/20' : ''
+      }`}
+      style={{
+        backgroundImage: `url(${gameBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Force Horizontal Mode Overlay */}
+      <div className="hidden portrait:flex fixed inset-0 z-[9999] bg-gradient-to-br from-slate-900 to-amber-950 flex-col items-center justify-center text-white p-6 text-center">
+        <div className="animate-bounce text-6xl mb-4">🔄</div>
+        <h2 className="text-2xl font-black tracking-tight mb-2">Por favor, gira tu pantalla</h2>
+        <p className="text-sm text-yellow-100 max-w-xs leading-relaxed">
+          DinoMath se disfruta mejor en modo horizontal. Gira tu dispositivo para comenzar la aventura.
+        </p>
+      </div>
+
       {/* HUD Top Bar panel */}
-      <div id="game-hud" className="relative z-10 w-full bg-white/80 backdrop-blur-md p-4 flex items-center justify-between border-b border-sky-100 shadow-xs">
+      <div id="game-hud" className="relative z-40 w-full bg-black/45 backdrop-blur-md p-4 flex items-center justify-between border-b border-white/10 shadow-lg">
         <button
           id="btn-quit"
           onClick={onBackToMenu}
-          className="flex items-center gap-1.5 px-3.5 py-2 text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 rounded-xl font-bold text-sm leading-none cursor-pointer transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-2 text-white bg-white/15 hover:bg-white/25 border border-white/20 hover:border-white/30 rounded-xl font-bold text-sm leading-none cursor-pointer transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Salir</span>
@@ -309,11 +355,11 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
 
         {/* Level Progression Indicator Bar */}
         <div className="flex-1 max-w-xs md:max-w-md mx-4 flex flex-col gap-1.5">
-          <div className="flex justify-between items-center text-xs text-slate-700 font-extrabold px-1">
+          <div className="flex justify-between items-center text-xs text-white/90 font-extrabold px-1">
             <span>PROGRESO A LA META</span>
-            <span className="text-emerald-700">{score} / 20 aciertos</span>
+            <span className="text-emerald-300 font-extrabold">{score} / 20 aciertos</span>
           </div>
-          <div className="w-full h-3.5 bg-slate-100 rounded-full border border-slate-200 overflow-hidden p-0.5 shadow-inner">
+          <div className="w-full h-3.5 bg-black/40 rounded-full border border-white/10 overflow-hidden p-0.5 shadow-inner">
             <motion.div
               style={{ width: `${Math.min(100, (score / 20) * 100)}%` }}
               className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
@@ -325,7 +371,7 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
         {/* Lives (Eggs representing 3 turns) and Audio Toggle */}
         <div className="flex items-center gap-3">
           {/* Speckled Dino Eggs lives indicator */}
-          <div id="lives-indicator" className="flex gap-1.5 bg-slate-100 border border-slate-250 py-1.5 px-3 rounded-full mr-1 items-center">
+          <div id="lives-indicator" className="flex gap-1.5 bg-black/25 border border-white/15 py-1.5 px-3 rounded-full mr-1 items-center">
             {[0, 1, 2].map((idx) => {
               const intact = idx < lives;
               return (
@@ -363,25 +409,37 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
           <button
             id="btn-audio-toggle"
             onClick={() => setMuted(!muted)}
-            className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 rounded-xl text-slate-700 cursor-pointer"
+            className="p-2 bg-white/10 border border-white/20 hover:bg-white/20 rounded-xl text-white cursor-pointer transition"
             title={muted ? 'Activar sonido' : 'Silenciar'}
           >
-            {muted ? <VolumeX className="w-5 h-5 text-red-500" /> : <Volume2 className="w-5 h-5 text-green-600" />}
+            {muted ? <VolumeX className="w-5 h-5 text-red-400" /> : <Volume2 className="w-5 h-5 text-green-400" />}
           </button>
         </div>
       </div>
 
-      {/* Interactive Sandbox Sky (where bubbles operate) */}
+      {/* Floating Centered Math Slate Tablet (Clean UX floating over the background sky) */}
+      <div className="absolute top-22 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 bg-amber-950/90 border-2 border-amber-800 px-5 py-2.5 rounded-2xl shadow-2xl shadow-black/80 backdrop-blur-md">
+        <span className="text-[10px] uppercase font-black text-amber-400 tracking-widest hidden sm:inline mr-1">🦖 RESUELVE:</span>
+        <div id="chalkboard-formula" className="text-3xl sm:text-4xl font-black text-stone-50 tracking-wide select-none">
+          {question.num1} <span className="text-amber-400">{question.operator}</span> {question.num2} <span className="text-yellow-300">=</span> <span className="text-emerald-400 font-extrabold animate-pulse">?</span>
+        </div>
+        <button
+          id="btn-skip"
+          onClick={handleSkipQuestion}
+          disabled={isLocked}
+          className="ml-3 p-2 bg-amber-800 hover:bg-amber-700 active:bg-amber-900 border border-amber-700 text-amber-100 disabled:opacity-50 rounded-xl cursor-pointer transition-colors flex items-center justify-center shadow-md shadow-amber-950"
+          title="Cambiar pregunta"
+        >
+          <RefreshCw className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Full-Screen Absolute Interactive Sandbox Sky (Bubbles float here) */}
       <div
         id="bubble-sandbox"
         ref={bubbleSandboxRef}
-        className="relative flex-1 w-full bg-radial from-sky-100 to-sky-300 md:bg-radial text-slate-700 overflow-hidden"
+        className="absolute inset-0 z-20 w-screen h-screen overflow-hidden"
       >
-        {/* Soft floating background clouds cartoon */}
-        <div className="absolute top-8 left-[10%] opacity-20 w-32 h-10 bg-white rounded-full filter blur-xs" />
-        <div className="absolute top-24 right-[15%] opacity-2c w-40 h-12 bg-white rounded-full filter blur-xs" />
-        <div className="absolute top-12 left-[44%] opacity-15 w-24 h-8 bg-white rounded-full filter blur-xs" />
-
         {/* Generate interactive floating bubbles */}
         <AnimatePresence>
           {bubbles.map((bubble) => (
@@ -396,26 +454,26 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
 
         {/* Feeding animation floating correct answer indicator */}
         <AnimatePresence>
-          {flyingNumber && (
+          {flyingNumber && flyingNumber.targetX !== undefined && flyingNumber.targetY !== undefined && (
             <motion.div
               key="food-num"
               initial={{
-                left: `${flyingNumber.startX}%`,
-                top: `${flyingNumber.startY}%`,
+                x: flyingNumber.startX,
+                y: flyingNumber.startY,
                 scale: 1.3
               }}
               animate={{
-                left: '18%', // Standard position above Dino's mouth coordinates
-                top: '73%',
+                x: flyingNumber.targetX,
+                y: flyingNumber.targetY,
                 scale: [1.3, 1.4, 0.4]
               }}
               exit={{ scale: 0, opacity: 0 }}
               transition={{
-                duration: 1.0,
-                ease: 'easeIn'
+                duration: 1.1,
+                ease: 'easeInOut'
               }}
               onAnimationComplete={handleNumberReachedDino}
-              className="absolute z-30 select-none pointer-events-none w-16 h-16 rounded-full bg-radial from-amber-300 to-yellow-500 border-4 border-white flex items-center justify-center text-slate-950 font-black text-2xl shadow-xl filter drop-shadow-md"
+              className="absolute left-0 top-0 z-50 select-none pointer-events-none w-16 h-16 rounded-full bg-gradient-to-r from-amber-300 to-yellow-500 border-4 border-white flex items-center justify-center text-slate-950 font-black text-2xl shadow-xl filter drop-shadow-md"
             >
               {flyingNumber.value}
             </motion.div>
@@ -423,49 +481,12 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
         </AnimatePresence>
       </div>
 
-      {/* Prehistoric Interactive Floor (Dino left, Stone Slate blackboard right) */}
-      <div id="game-floor" className="relative z-10 w-full h-56 md:h-64 bg-slate-800/50 backdrop-blur-md p-4/5 pt-3 flex items-end justify-between gap-4 border-t-4 border-green-500 shadow-inner">
-        
-        {/* Ground grass layered visual illustration */}
-        <div className="absolute top-0 inset-x-0 h-4 bg-gradient-to-b from-green-500 to-emerald-600 pointer-events-none" />
-        <div className="absolute top-2.5 inset-x-0 h-1.5 bg-green-400 opacity-60 pointer-events-none" />
-
-        {/* Left corner: Dinosaur character handler */}
-        <div className="relative z-10 pb-2 w-1/3 max-w-[170px] flex justify-center ml-2 md:ml-6">
-          <Dinosaur state={dinoState} />
-        </div>
-
-        {/* Center/Right corner: Prehistoric Slate stone slate math tablet */}
-        <div className="relative z-10 flex-1 max-w-sm mr-2 md:mr-6 pb-2">
-          <div className="bg-amber-950 border-4 border-amber-800 rounded-2xl shadow-2xl overflow-hidden">
-            
-            {/* Wooden frame outline */}
-            <div className="bg-amber-800/80 text-amber-100 text-[11px] font-black tracking-widest px-3 py-1 text-center border-b border-amber-900 flex justify-between items-center">
-              <span>🦕 PIZARRA DE OPERACIONES</span>
-              
-              {/* Skip current question button */}
-              <button
-                id="btn-skip"
-                onClick={handleSkipQuestion}
-                disabled={isLocked}
-                className="px-2.5 py-0.5 bg-amber-600 hover:bg-amber-500 active:bg-amber-700 rounded text-[10px] font-extrabold cursor-pointer transition-colors"
-                title="Generar otro problema"
-              >
-                Cambiar Q
-              </button>
-            </div>
-
-            {/* Slate Inner Chalk Blackboard */}
-            <div className="bg-slate-900 p-4 min-h-[96px] md:min-h-[110px] flex flex-col justify-center items-center font-mono">
-              <span className="text-[10px] tracking-widest font-black text-teal-400 opacity-80 uppercase mb-1">Resuelve:</span>
-              
-              {/* Math formula */}
-              <div id="chalkboard-formula" className="text-4xl md:text-5xl font-black text-stone-50 text-center tracking-wide leading-none drop-shadow-md select-none">
-                {question.num1} <span className="text-amber-400">{question.operator}</span> {question.num2} <span className="text-yellow-300">=</span> <span className="text-emerald-400 font-extrabold animate-pulse">?</span>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Dinosaur Character (Center aligned at the bottom) */}
+      <div 
+        ref={dinoRef} 
+        className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 z-30 select-none pointer-events-none flex justify-center w-[300px] sm:w-[360px] md:w-[420px] lg:w-[460px] h-[300px] sm:h-[360px] md:h-[420px] lg:h-[460px]"
+      >
+        <Dinosaur state={dinoState} />
       </div>
     </div>
   );
