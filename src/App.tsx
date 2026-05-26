@@ -15,14 +15,15 @@ export default function App() {
   const [gameState, setGameState] = useState<GameState>('welcome');
   const [category, setCategory] = useState<OperationType>('mix');
   const [finalScore, setFinalScore] = useState<number>(0);
+  const [targetScore, setTargetScore] = useState<number>(10);
+  const [score, setScore] = useState<number>(0);
 
-  const handleStartGame = (selectedCategory: OperationType) => {
+  const handleStartGame = (selectedCategory: OperationType, count: number) => {
     setCategory(selectedCategory);
+    setTargetScore(count);
     setScore(0);
     setGameState('playing');
   };
-
-  const [score, setScore] = useState<number>(0);
 
   const handleVictory = (scoreReached: number) => {
     setFinalScore(scoreReached);
@@ -57,12 +58,19 @@ export default function App() {
       {/* Main Core Container */}
       <main className="relative z-10 flex-1 flex items-center justify-center py-4 px-4">
         {gameState === 'welcome' && (
-          <WelcomeScreen onStartGame={handleStartGame} />
+          <WelcomeScreen
+            category={category}
+            setCategory={setCategory}
+            targetScore={targetScore}
+            setTargetScore={setTargetScore}
+            onStartGame={handleStartGame}
+          />
         )}
 
         {gameState === 'playing' && (
           <GameScreen
             category={category}
+            targetScore={targetScore}
             onVictory={handleVictory}
             onGameOver={handleGameOver}
             onBackToMenu={() => setGameState('welcome')}
@@ -73,8 +81,10 @@ export default function App() {
           <VictoryScreen
             score={finalScore}
             category={category}
+            targetScore={targetScore}
             onRestart={() => setGameState('playing')}
             onBackToMenu={() => setGameState('welcome')}
+            onChangeCategory={setCategory}
           />
         )}
 
@@ -82,8 +92,10 @@ export default function App() {
           <GameOverScreen
             score={finalScore}
             category={category}
+            targetScore={targetScore}
             onRestart={() => setGameState('playing')}
             onBackToMenu={() => setGameState('welcome')}
+            onChangeCategory={setCategory}
           />
         )}
       </main>

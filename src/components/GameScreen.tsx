@@ -11,6 +11,7 @@ import gameBackground from '@/assets/Dinosaur/Background.png';
 
 interface GameScreenProps {
   category: OperationType;
+  targetScore: number;
   onVictory: (finalScore: number) => void;
   onGameOver: (finalScore: number) => void;
   onBackToMenu: () => void;
@@ -103,7 +104,7 @@ const playSynthSound = (type: 'pop' | 'success' | 'chew' | 'sad', muted: boolean
   }
 };
 
-export default function GameScreen({ category, onBackToMenu, onVictory, onGameOver }: GameScreenProps) {
+export default function GameScreen({ category, targetScore, onBackToMenu, onVictory, onGameOver }: GameScreenProps) {
   const [score, setScore] = useState<number>(0);
   const [lives, setLives] = useState<number>(3);
   const [question, setQuestion] = useState<Question>(generateQuestion(category));
@@ -298,8 +299,8 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
       const newScore = score + 1;
       setScore(newScore);
 
-      // Check for victory target (20 points)
-      if (newScore >= 20) {
+      // Check for victory target
+      if (newScore >= targetScore) {
         // Save matching highscore
         const currentHighScore = localStorage.getItem('dino_math_high_score');
         if (!currentHighScore || newScore > parseInt(currentHighScore, 10)) {
@@ -357,11 +358,11 @@ export default function GameScreen({ category, onBackToMenu, onVictory, onGameOv
         <div className="flex-1 max-w-xs md:max-w-md mx-4 flex flex-col gap-1.5">
           <div className="flex justify-between items-center text-xs text-white/90 font-extrabold px-1">
             <span>PROGRESO A LA META</span>
-            <span className="text-emerald-300 font-extrabold">{score} / 20 aciertos</span>
+            <span className="text-emerald-300 font-extrabold">{score} / {targetScore} aciertos</span>
           </div>
           <div className="w-full h-3.5 bg-black/40 rounded-full border border-white/10 overflow-hidden p-0.5 shadow-inner">
             <motion.div
-              style={{ width: `${Math.min(100, (score / 20) * 100)}%` }}
+              style={{ width: `${Math.min(100, (score / targetScore) * 100)}%` }}
               className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
               transition={{ type: 'spring', damping: 15 }}
             />

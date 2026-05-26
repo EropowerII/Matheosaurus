@@ -5,11 +5,20 @@ import Dinosaur from './Dinosaur';
 import { Plus, Minus, X, Percent, Shuffle, Trophy, Play } from 'lucide-react';
 
 interface WelcomeScreenProps {
-  onStartGame: (category: OperationType) => void;
+  category: OperationType;
+  setCategory: (category: OperationType) => void;
+  targetScore: number;
+  setTargetScore: (targetScore: number) => void;
+  onStartGame: (category: OperationType, questionsCount: number) => void;
 }
 
-export default function WelcomeScreen({ onStartGame }: WelcomeScreenProps) {
-  const [selectedCategory, setSelectedCategory] = React.useState<OperationType>('mix');
+export default function WelcomeScreen({
+  category,
+  setCategory,
+  targetScore,
+  setTargetScore,
+  onStartGame,
+}: WelcomeScreenProps) {
   const [highScore, setHighScore] = React.useState<number>(0);
 
   React.useEffect(() => {
@@ -83,7 +92,7 @@ export default function WelcomeScreen({ onStartGame }: WelcomeScreenProps) {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-slate-600 text-xs md:text-sm mt-2 max-w-md leading-relaxed font-medium"
           >
-            ¡Resuelve operaciones matemáticas completando misiones! Explota la burbuja correcta para alimentar a Mateo. Consigue 20 aciertos antes de acumular 3 errores.
+            ¡Resuelve operaciones matemáticas completando misiones! Explota la burbuja correcta para alimentar a Mateo. Consigue <span className="text-green-600 font-extrabold">{targetScore} aciertos</span> antes de acumular 3 errores.
           </motion.p>
         </div>
 
@@ -124,37 +133,64 @@ export default function WelcomeScreen({ onStartGame }: WelcomeScreenProps) {
           {/* Category List - Balanced space-saving 2 column layout with Col-span-2 for Mixed */}
           <div id="categories-grid" className="grid grid-cols-2 gap-2 mb-4">
             {categories.map((cat) => {
-              const isSelected = selectedCategory === cat.type;
-              const isMix = cat.type === 'mix';
+               const isSelected = category === cat.type;
+               const isMix = cat.type === 'mix';
+               return (
+                 <button
+                   key={cat.type}
+                   id={`cat-${cat.type}`}
+                   onClick={() => setCategory(cat.type)}
+                   className={`relative flex items-center gap-2 px-3 py-2.5 rounded-xl text-left border-2 transition-all cursor-pointer ${
+                     isMix ? 'col-span-2' : ''
+                   } ${
+                     isSelected
+                       ? 'border-green-500 bg-green-50/75 shadow-xs scale-[1.01]'
+                       : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'
+                   }`}
+                 >
+                   <div className={`p-1.5 rounded-lg flex items-center justify-center shadow-xs shrink-0 ${cat.color}`}>
+                     {cat.icon}
+                   </div>
+                   <div className="min-w-0 flex-1">
+                     <div className="font-extrabold text-slate-800 text-xs md:text-sm leading-none truncate">
+                       {cat.label}
+                     </div>
+                     <div className="text-[10px] text-slate-500 mt-0.5 truncate">
+                       {cat.desc}
+                     </div>
+                   </div>
+                   {isSelected && (
+                     <div className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 rounded-full bg-green-500 flex items-center justify-center text-white text-[9px] font-bold">
+                       ✓
+                     </div>
+                   )}
+                 </button>
+               );
+            })}
+          </div>
+        </div>
+
+        {/* Question Count Selector */}
+        <div className="mt-2 mb-3">
+          <h3 className="text-xs md:text-sm font-black text-slate-700 tracking-tight text-center md:text-left mb-2 uppercase">
+            🎯 ¿Cuántos aciertos para ganar?
+          </h3>
+          <div className="grid grid-cols-3 gap-2">
+            {[10, 15, 20].map((num) => {
+              const isSelected = targetScore === num;
               return (
                 <button
-                  key={cat.type}
-                  id={`cat-${cat.type}`}
-                  onClick={() => setSelectedCategory(cat.type)}
-                  className={`relative flex items-center gap-2 px-3 py-2.5 rounded-xl text-left border-2 transition-all cursor-pointer ${
-                    isMix ? 'col-span-2' : ''
-                  } ${
+                  key={num}
+                  type="button"
+                  id={`qcount-${num}`}
+                  onClick={() => setTargetScore(num)}
+                  className={`py-1.5 px-2.5 rounded-xl border-2 font-black text-center text-xs transition-all cursor-pointer ${
                     isSelected
-                      ? 'border-green-500 bg-green-50/75 shadow-xs scale-[1.01]'
-                      : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300'
+                      ? 'border-green-500 bg-green-50 text-green-700 shadow-xs scale-[1.02]'
+                      : 'border-slate-100 bg-slate-50 text-slate-600 hover:bg-slate-150'
                   }`}
                 >
-                  <div className={`p-1.5 rounded-lg flex items-center justify-center shadow-xs shrink-0 ${cat.color}`}>
-                    {cat.icon}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-extrabold text-slate-800 text-xs md:text-sm leading-none truncate">
-                      {cat.label}
-                    </div>
-                    <div className="text-[10px] text-slate-500 mt-0.5 truncate">
-                      {cat.desc}
-                    </div>
-                  </div>
-                  {isSelected && (
-                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 rounded-full bg-green-500 flex items-center justify-center text-white text-[9px] font-bold">
-                      ✓
-                    </div>
-                  )}
+                  {num} aciertos
                 </button>
               );
             })}
@@ -164,7 +200,7 @@ export default function WelcomeScreen({ onStartGame }: WelcomeScreenProps) {
         {/* Big Start Button */}
         <motion.button
           id="btn-play-now"
-          onClick={() => onStartGame(selectedCategory)}
+          onClick={() => onStartGame(category, targetScore)}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-black text-sm py-4 px-5 rounded-xl shadow-md border border-green-400 cursor-pointer flex items-center justify-center gap-2 transition-all mt-2"
