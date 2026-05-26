@@ -19,10 +19,6 @@ concurrency:
   group: "pages"
   cancel-in-progress: true
 
-# Set environment variables globally to prevent Node 20 deprecation issues
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 jobs:
   deploy:
     environment:
@@ -37,10 +33,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          if [ -f package-lock.json ]; then
+            echo "package-lock.json found. Installing via npm ci..."
+            npm ci
+          else
+            echo "package-lock.json NOT found. Installing via npm install..."
+            npm install
+          fi
 
       - name: Build application
         run: npm run build
