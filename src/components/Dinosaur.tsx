@@ -153,14 +153,14 @@ export default function Dinosaur({ state, showOverlays = true }: DinosaurProps) 
     <div id="dinosaur-canvas-container" className="relative flex flex-col items-center justify-center w-[300px] h-[300px] sm:w-[360px] sm:h-[360px] md:w-[420px] md:h-[420px] lg:w-[460px] lg:h-[460px] select-none">
       {/* Dynamic Overlay Text & Badges (Munching, Happy, Sad) */}
       {showOverlays && (
-        <div className="absolute top-0 flex flex-col items-center pointer-events-none z-20">
+        <div className="absolute inset-0 pointer-events-none z-40">
           <AnimatePresence>
             {state === 'happy' && (
               <motion.div
                 initial={{ opacity: 0, y: 20, scale: 0.5 }}
                 animate={{ opacity: 1, y: -20, scale: 1.2 }}
                 exit={{ opacity: 0 }}
-                className="text-yellow-400 text-3xl font-bold flex gap-1 filter drop-shadow-md"
+                className="absolute top-[-10px] left-1/2 -translate-x-1/2 text-yellow-400 text-3xl font-bold flex gap-1 filter drop-shadow-md whitespace-nowrap"
               >
                 <span>⭐</span>
                 <span>¡RRIQUÍSIMO!</span>
@@ -172,21 +172,80 @@ export default function Dinosaur({ state, showOverlays = true }: DinosaurProps) 
                 initial={{ opacity: 0, y: 20, scale: 0.5 }}
                 animate={{ opacity: 1, y: -10, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className="bg-red-500 text-white font-extrabold text-xs px-3 py-1 rounded-full shadow-lg border border-red-300 flex items-center gap-1"
+                className="absolute top-[-10px] left-1/2 -translate-x-1/2 bg-red-500 text-white font-extrabold text-xs px-3 py-1 rounded-full shadow-lg border border-red-300 flex items-center gap-1 whitespace-nowrap"
               >
                 <span>😢</span>
                 <span>¡Uy! ¡Casi!</span>
               </motion.div>
             )}
             {state === 'eating' && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: [1, 1.1, 1] }}
-                exit={{ opacity: 0 }}
-                className="text-amber-600 dark:text-amber-400 font-extrabold tracking-widest text-lg"
-              >
-                ¡ÑAM ÑAM!
-              </motion.div>
+              <>
+                {/* 1st ÑAM - Left Side */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.2, rotate: -25 }}
+                  animate={{ 
+                    opacity: [0, 1, 1, 0.9, 0],
+                    scale: [0.2, 1.35, 1.15, 1.25, 0],
+                    rotate: [-25, 15, 8, 12, -5]
+                  }}
+                  transition={{ 
+                    duration: 0.6,
+                    delay: 0,
+                    times: [0, 0.2, 0.4, 0.8, 1],
+                    ease: 'easeOut'
+                  }}
+                  style={{
+                    textShadow: '3.5px 3.5px 0px #1e1b4b, -3.5px -3.5px 0px #1e1b4b, 3.5px -3.5px 0px #1e1b4b, -3.5px 3.5px 0px #1e1b4b, 5px 5px 12px rgba(0,0,0,0.5)',
+                  }}
+                  className="absolute top-[10%] left-[-15px] sm:left-[-35px] md:left-[-60px] text-yellow-300 font-extrabold italic tracking-widest text-3xl sm:text-4xl md:text-5xl uppercase whitespace-nowrap z-50 select-none"
+                >
+                  ¡ÑAM!
+                </motion.div>
+
+                {/* 2nd ÑAM - Right Side */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.2, rotate: 15 }}
+                  animate={{ 
+                    opacity: [0, 1, 1, 0.9, 0],
+                    scale: [0.2, 1.35, 1.15, 1.25, 0],
+                    rotate: [15, -15, -8, -12, 5]
+                  }}
+                  transition={{ 
+                    duration: 0.6,
+                    delay: 0.35,
+                    times: [0, 0.2, 0.4, 0.8, 1],
+                    ease: 'easeOut'
+                  }}
+                  style={{
+                    textShadow: '3.5px 3.5px 0px #1e1b4b, -3.5px -3.5px 0px #1e1b4b, 3.5px -3.5px 0px #1e1b4b, -3.5px 3.5px 0px #1e1b4b, 5px 5px 12px rgba(0,0,0,0.5)',
+                  }}
+                  className="absolute top-[20%] right-[-15px] sm:right-[-35px] md:right-[-60px] text-amber-400 font-extrabold italic tracking-widest text-3xl sm:text-4xl md:text-5xl uppercase whitespace-nowrap z-50 select-none"
+                >
+                  ¡ÑAM!
+                </motion.div>
+
+                {/* 3rd ÑAM - Left Side (slightly lower) */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.2, rotate: -30 }}
+                  animate={{ 
+                    opacity: [0, 1, 1, 0.9, 0],
+                    scale: [0.2, 1.4, 1.15, 1.3, 0],
+                    rotate: [-30, 20, 12, 15, -10]
+                  }}
+                  transition={{ 
+                    duration: 0.6,
+                    delay: 0.7,
+                    times: [0, 0.2, 0.4, 0.8, 1],
+                    ease: 'easeOut'
+                  }}
+                  style={{
+                    textShadow: '3.5px 3.5px 0px #1e1b4b, -3.5px -3.5px 0px #1e1b4b, 3.5px 3.5px 0px #1e1b4b, -3.5px 3.5px 0px #1e1b4b, 5px 5px 12px rgba(0,0,0,0.5)',
+                  }}
+                  className="absolute top-[30%] left-[-25px] sm:left-[-45px] md:left-[-70px] text-green-400 font-extrabold italic tracking-widest text-3xl sm:text-4xl md:text-5xl uppercase whitespace-nowrap z-50 select-none"
+                >
+                  ¡ÑAM!
+                </motion.div>
+              </>
             )}
           </AnimatePresence>
         </div>

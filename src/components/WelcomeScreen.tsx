@@ -108,11 +108,9 @@ export default function WelcomeScreen({
           </motion.div>
         )}
 
-        {/* Character Display Spotlight - Optimized specifically to be shorter on mobile landscape */}
-        <div className="relative w-full max-w-sm flex items-center justify-center bg-gradient-to-br from-emerald-100/40 to-green-100/35 rounded-xl border border-green-200/50 p-1 h-20 landscape:h-20 sm:h-28 md:h-36 overflow-hidden mt-1.5 shadow-inner">
-          <div className="absolute top-1 left-3 text-[7px] font-black tracking-widest text-green-700/60 uppercase">MATEO EL DINOSAURIO</div>
-          <div className="absolute bottom-1 bg-green-500/10 text-green-700 text-[8px] font-bold px-1.5 py-0.5 rounded-full z-10">LISTO PARA COMER</div>
-          <div className="transform scale-[0.16] landscape:scale-[0.15] sm:scale-[0.22] md:scale-[0.32] origin-center -mb-8 flex items-center justify-center shrink-0 z-0">
+        {/* Character Display Spotlight - Unwrapped and significantly enlarged to stand out prominently */}
+        <div className="relative w-full flex items-center justify-center h-28 landscape:h-24 sm:h-36 md:h-44 overflow-visible mt-2 select-none">
+          <div className="transform scale-[0.45] landscape:scale-[0.36] sm:scale-[0.58] md:scale-[0.72] origin-center flex items-center justify-center shrink-0 z-0">
             <Dinosaur state="idle" />
           </div>
         </div>
